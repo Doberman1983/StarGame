@@ -21,6 +21,8 @@ import ru.geekbrains.sprite.ButtonNewGame;
 import ru.geekbrains.sprite.Enemy;
 import ru.geekbrains.sprite.GameOver;
 import ru.geekbrains.sprite.MainShip;
+import ru.geekbrains.sprite.PauseButton;
+import ru.geekbrains.sprite.ResumeButton;
 import ru.geekbrains.sprite.Star;
 import ru.geekbrains.utils.EnemyEmitter;
 
@@ -52,6 +54,14 @@ public class GameScreen extends BaseScreen {
     private StringBuilder sbFrags;
     private StringBuilder sbHp;
     private StringBuilder sbLevel;
+    private TextureAtlas atl;
+    private PauseButton pauseButton;
+    private ResumeButton resumeButton;
+    private boolean pause = false;
+
+    public void toggle (boolean f) {
+        pause = f;
+    }
 
     @Override
     public void show() {
@@ -78,15 +88,22 @@ public class GameScreen extends BaseScreen {
         music.setLooping(true);
         music.play();
         state = State.PLAYING;
+        atl = new TextureAtlas("textures/button2.tpack");
+        pauseButton = new PauseButton(atl,this);
+        resumeButton = new ResumeButton(atl,this);
     }
 
     @Override
     public void render(float delta) {
+        if (!pause) {
         super.render(delta);
         update(delta);
         checkCollision();
         free();
-        draw();
+        draw();} else {
+            draw_resume();
+            }
+
     }
 
     @Override
@@ -99,6 +116,8 @@ public class GameScreen extends BaseScreen {
         enemyEmitter.resize(worldBounds);
         gameOver.resize(worldBounds);
         buttonNewGame.resize(worldBounds);
+        pauseButton.resize(worldBounds);
+        resumeButton.resize(worldBounds);
         font.setSize(FONT_SIZE);
     }
 
@@ -133,11 +152,13 @@ public class GameScreen extends BaseScreen {
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        if (state == State.PLAYING) {
+        if (state == State.PLAYING & !pauseButton.isMe(touch)) {
             mainShip.touchDown(touch, pointer, button);
-        } else if (state == State.GAME_OVER) {
+        } else if (state == State.GAME_OVER & !pauseButton.isMe(touch)) {
             buttonNewGame.touchDown(touch, pointer, button);
         }
+        if (pauseButton.isMe(touch)) pauseButton.touchDown(touch, pointer, button);
+        if (resumeButton.isMe(touch)) resumeButton.touchDown(touch, pointer, button);
         return false;
     }
 
@@ -148,6 +169,8 @@ public class GameScreen extends BaseScreen {
         } else if (state == State.GAME_OVER) {
             buttonNewGame.touchUp(touch, pointer, button);
         }
+        pauseButton.touchUp(touch, pointer, button);
+        resumeButton.touchUp(touch, pointer, button);
         return false;
     }
 
@@ -227,6 +250,8 @@ public class GameScreen extends BaseScreen {
         for (Star star : stars) {
             star.draw(batch);
         }
+
+        pauseButton.draw(batch);
         if (state == State.PLAYING) {
             mainShip.draw(batch);
             bulletPool.drawActiveSprites(batch);
@@ -235,8 +260,23 @@ public class GameScreen extends BaseScreen {
             gameOver.draw(batch);
             buttonNewGame.draw(batch);
         }
+
         explosionPool.drawActiveSprites(batch);
         printInfo();
+
+        batch.end();
+    }
+
+    private void draw_resume() {
+        batch.begin();
+        background.draw(batch);
+        for (Star star : stars) {
+            star.draw(batch);
+        }
+
+        resumeButton.draw(batch);
+
+
         batch.end();
     }
 

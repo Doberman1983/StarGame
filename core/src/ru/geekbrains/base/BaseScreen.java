@@ -1,5 +1,6 @@
 package ru.geekbrains.base;
 
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
@@ -64,6 +65,7 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void pause() {
+
     }
 
     @Override
@@ -82,6 +84,9 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        //System.out.println("pause");
+        //pause();
+        //ApplicationListener.pause();
         return false;
     }
 
